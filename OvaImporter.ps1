@@ -1,25 +1,18 @@
-# OVA Importer Tool
+# OVA Importer Tool - Genosystem
+
 Param(
-    [Parameter(Mandatory = $false)][ValidateSet('e', 's', 'lo', 'li', 'i', 'o', 'c')][string]$direction,
     [Parameter(Mandatory = $false)][string]$OvaSource = "",
-    [Parameter(Mandatory = $false)][string]$OvaCheck = "",
+    [Parameter(Mandatory = $false)][bool]$OvaCheck = $false,
     [Parameter(Mandatory = $false)][int]$ClusterSelected = 9999,
     [Parameter(Mandatory = $false)][string]$VMName
 )
-
-
-
-<#
-TODO Check Values
-TODO File default
-
-#>
 
 While (!$OvaCheck) { 
     [string]$OvaSource = Read-Host "File path to OVA"
     $OvaCheck = Test-Path $OvaSource -PathType leaf
     if (!$OvaCheck) {
-        Write-Host "File not found or not accesible" -ForegroundColor DarkRed
+        Write-Host "File not found or not accessible" -ForegroundColor DarkRed
+        Write-Host "Mapped drives not supported, use UNC path" -ForegroundColor DarkRed
     }
 }
 [string]$FileName = Split-Path $OvaSource -leafbase
@@ -57,5 +50,4 @@ $VMName = Read-Host “Vm Name (Press Enter to set to $FileName)”
 if (!$VMName) { $VMName = $Filename }
 Write-host "Name $VMName" -ForegroundColor DarkGreen
 
-# Don't work with mapped drives
 Import-vApp –Source $OvaSource -Location $ClusterSelected[0] -Datastore $DSSelected -Name $VMName -Host $RNDHost[(Get-random ($RNDHost.Count))] -Force
