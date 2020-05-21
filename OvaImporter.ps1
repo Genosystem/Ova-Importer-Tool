@@ -4,15 +4,23 @@ Param(
     [Parameter(Mandatory = $false)][string]$OvaSource = "",
     [Parameter(Mandatory = $false)][bool]$OvaCheck = $false,
     [Parameter(Mandatory = $false)][int]$ClusterSelected = 9999,
+    [Parameter(Mandatory = $false)][int]$DSSelected = 9999,
     [Parameter(Mandatory = $false)][string]$VMName
 )
 
 While (!$OvaCheck) { 
     [string]$OvaSource = Read-Host "File path to OVA"
+    $Ovasource  = $OvaSource.Replace('"','')
+    $SMBDrives = Get-SMBMapping
+    foreach ($SMBDrive in $SMBDrives){
+        if ((Split-Path $OvaSource -Qualifier) -eq $SMBDrive.LocalPath) {
+            Write-Host "Mapped drive "(Split-Path $OvaSource -Qualifier)" detected, converting to "($SMBDrive.RemotePath) -ForegroundColor DarkYellow
+            $OvaSource = $OvaSource.Replace((Split-Path $OvaSource -Qualifier),($SMBDrive.RemotePath))
+        }
+    }
     $OvaCheck = Test-Path $OvaSource -PathType leaf
     if (!$OvaCheck) {
         Write-Host "File not found or not accessible" -ForegroundColor DarkRed
-        Write-Host "Mapped drives not supported, use UNC path" -ForegroundColor DarkRed
     }
 }
 [string]$FileName = Split-Path $OvaSource -leafbase
