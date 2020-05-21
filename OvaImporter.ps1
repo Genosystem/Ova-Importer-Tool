@@ -3,7 +3,8 @@ Param(
     [Parameter(Mandatory = $false)][ValidateSet('e', 's', 'lo', 'li', 'i', 'o', 'c')][string]$direction,
     [Parameter(Mandatory = $false)][string]$OvaSource = "",
     [Parameter(Mandatory = $false)][string]$OvaCheck = "",
-    [Parameter(Mandatory = $false)][int]$ClusterSelected = 9999
+    [Parameter(Mandatory = $false)][int]$ClusterSelected = 9999,
+    [Parameter(Mandatory = $false)][string]$VMName
 )
 
 
@@ -28,7 +29,7 @@ $ClustersList = get-cluster
 $i = 1
 foreach ($ClustersItem in $ClustersList ) {
     
-    Write-Host "[$i]    - $ClustersItem"
+    Write-Host "[$i] - $ClustersItem"
     $i++
 }
 While ($ClusterSelected -gt $ClustersList.Count -or $ClusterSelected -lt 1) { 
@@ -39,13 +40,18 @@ Write-host "$ClusterSelected Selected" -ForegroundColor DarkGreen
 $RNDHost = ($ClusterSelected | Get-VMHost)
 
 $DSList = get-cluster $ClusterSelected | Get-Datastore
-$i = 0
+$i = 1
 foreach ($DSItem in $DSList ) {
     
-    Write-Host "[$i]    - $DSItem"
+    Write-Host "[$i] - $DSItem"
     $i++
 }
-$DSSelected = Get-Datastore ($DSList[(Read-Host "DataStore Number")])
+
+While ($DSSelected -gt $DSList.Count -or $DSSelected -lt 1) { 
+    $DSSelected = Read-Host "DataStore Number"
+}
+
+$DSSelected = Get-Datastore ($DSList[($DSSelected -1)])
 Write-host "$DSSelected Selected" -ForegroundColor DarkGreen
 $VMName = Read-Host “Vm Name (Press Enter to set to $FileName)”
 if (!$VMName) { $VMName = $Filename }
