@@ -8,6 +8,12 @@ Param(
     [Parameter(Mandatory = $false)][string]$VMName
 )
 
+While (!$global:DefaultVIServer){
+    $ViServer = Read-Host "Vcenter server"
+    Connect-VIServer -Server $ViServer
+}
+
+
 While (!$OvaCheck) { 
     [string]$OvaSource = Read-Host "File path to OVA"
     $Ovasource  = $OvaSource.Replace('"','')
