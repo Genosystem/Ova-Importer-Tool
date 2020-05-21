@@ -1,12 +1,29 @@
 # OVA Importer Tool
+Param(
+    [Parameter(Mandatory = $false)][ValidateSet('e', 's', 'lo', 'li', 'i', 'o', 'c')][string]$direction,
+    [Parameter(Mandatory = $false)][string]$OvaSource = "",
+    [Parameter(Mandatory = $false)][string]$OvaCheck = ""
+
+)
+
+
+
 <#
 TODO Check Values
 TODO File default
 
 #>
 
-
-[string]$OvaSource = Read-Host "File path to OVA"
+#While ($Hour -gt 23 -or $Hour -lt 0) { 
+While (!$OvaCheck) { 
+    [string]$OvaSource = Read-Host "File path to OVA"
+    $OvaCheck = Test-Path $OvaSource -PathType leaf
+    if (!$OvaCheck) {
+        Write-Host "File not found or not accesible" -ForegroundColor DarkRed
+    }
+}
+# 
+[string]$FileName = Split-Path $OvaSource -leafbase
 $ClustersList = get-cluster
 $i = 0
 foreach ($ClustersItem in $ClustersList ) {
@@ -28,7 +45,9 @@ foreach ($DSItem in $DSList ) {
 }
 $DSSelected = Get-Datastore ($DSList[(Read-Host "DataStore Number")])
 Write-host "$DSSelected Selected" -ForegroundColor DarkGreen
-$VMName = Read-Host “Vm Name”
+$VMName = Read-Host “Vm Name (Press Enter to set to $FileName)”
+if (!$VMName) { $VMName = $Filename }
+Write-host "Name $VMName" -ForegroundColor DarkGreen
 
 # Don't work with mapped drives
 Import-vApp –Source $OvaSource -Location $ClusterSelected[0] -Datastore $DSSelected -Name $VMName -Host $RNDHost[(Get-random ($RNDHost.Count))] -Force
