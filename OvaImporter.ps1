@@ -2,8 +2,8 @@
 Param(
     [Parameter(Mandatory = $false)][ValidateSet('e', 's', 'lo', 'li', 'i', 'o', 'c')][string]$direction,
     [Parameter(Mandatory = $false)][string]$OvaSource = "",
-    [Parameter(Mandatory = $false)][string]$OvaCheck = ""
-
+    [Parameter(Mandatory = $false)][string]$OvaCheck = "",
+    [Parameter(Mandatory = $false)][int]$ClusterSelected = 9999
 )
 
 
@@ -14,7 +14,6 @@ TODO File default
 
 #>
 
-#While ($Hour -gt 23 -or $Hour -lt 0) { 
 While (!$OvaCheck) { 
     [string]$OvaSource = Read-Host "File path to OVA"
     $OvaCheck = Test-Path $OvaSource -PathType leaf
@@ -22,17 +21,20 @@ While (!$OvaCheck) {
         Write-Host "File not found or not accesible" -ForegroundColor DarkRed
     }
 }
-# 
 [string]$FileName = Split-Path $OvaSource -leafbase
+
+
 $ClustersList = get-cluster
-$i = 0
+$i = 1
 foreach ($ClustersItem in $ClustersList ) {
     
     Write-Host "[$i]    - $ClustersItem"
     $i++
 }
-
-$ClusterSelected = Get-Cluster ($ClustersList[(Read-Host "Cluster Number")])
+While ($ClusterSelected -gt $ClustersList.Count -or $ClusterSelected -lt 1) { 
+    $ClusterSelected = Read-Host "Cluster Number"
+}
+$ClusterSelected = Get-Cluster ($ClustersList[($ClusterSelected -1)])
 Write-host "$ClusterSelected Selected" -ForegroundColor DarkGreen
 $RNDHost = ($ClusterSelected | Get-VMHost)
 
